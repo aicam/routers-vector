@@ -1,4 +1,7 @@
 from typing import List
+from dataclasses import dataclass
+
+ROUTING_VECTOR = {}
 
 class ServerIPs:
     id: int
@@ -27,7 +30,6 @@ class Distances:
 
 class RoutingTable:
     self_ip: str
-    self_ip: str
     self_port: int
     num_servers: int
     num_neighbors: int
@@ -49,3 +51,6 @@ class RoutingTable:
         print("List of neighbor servers ID and distance")
         for s in self.distances:
             print(f"ID 1: {s.id1} - ID 2: {s.id2} - distance: {s.distance}")
+
+
+routing_table = RoutingTable()

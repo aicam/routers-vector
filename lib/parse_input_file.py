@@ -1,5 +1,5 @@
 from . import structures as struct
-
+from .structures import routing_table
 def read_file(file):
     '''
     Read the routing table file
@@ -8,7 +8,6 @@ def read_file(file):
     '''
     f = open(file, 'r')
     lines = [l.replace("\n", "") for l in f.readlines()]
-    routing_table = struct.RoutingTable()
     routing_table.num_servers = int(lines[0])
     routing_table.num_neighbors = int(lines[1])
     for i in range(2, routing_table.num_neighbors + 3):
