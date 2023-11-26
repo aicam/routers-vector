@@ -23,6 +23,7 @@ if __name__ == "__main__":
     print()
 
     while True:
+        ## Commands come here
         cmd = input("Enter new command: ")
         if cmd == 'display':
             print(ROUTING_VECTOR)
