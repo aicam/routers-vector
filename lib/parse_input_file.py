@@ -4,7 +4,7 @@ def read_file(file):
     '''
     Read the routing table file
     :param file: path to the routing table
-    :return: routing table class
+    :return: routing table class s
     '''
     f = open(file, 'r', encoding='utf-8')
     lines = [l.replace("\n", "") for l in f.readlines()]

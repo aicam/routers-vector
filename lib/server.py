@@ -67,6 +67,7 @@ class UDPServerThread:
 
     def send_packet(self):
         ## This function is called on "step" command to send messages to all servers in routing_table
+        #
 
         for n in routing_table.servers_ip[1:]:
             update_packet = generate_message()

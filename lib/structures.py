@@ -1,6 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 
+
 ROUTING_VECTOR = {}
 
 class ServerIPs:
