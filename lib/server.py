@@ -1,31 +1,47 @@
 import socket
 import threading
-from .structures import routing_table, ROUTING_VECTOR
+from .structures import routing_table, ROUTING_VECTOR, ServerIPs, NUM_RECEIVED_PACKETS
+from .router import update_distance_vector
+
 def generate_message():
     ## This function reads routing_table and parse it to the correct format for sending to other nodes
     ## Routing updates are sent using the General Message format. All routing updates are UDP unreliable
     ## The message format for the data part is: 
     message = {}
     # Number of update fields check if the routing vector has any changes
-    ## TODO add real updated entries
     num_entries = len(ROUTING_VECTOR)
-    message['Number_of_updates'] = num_entries
+    message['number_of_updates'] = num_entries
     # Server port
-    message['Server_port'] = routing_table.self_port
+    message['server_port'] = routing_table.self_port
     # Server IP
-    message['Server_IP'] = routing_table.self_ip
-    # Server entry to reach itself wit hcost 0
-    message['Server_IP_address_1'] = routing_table.self_ip
-    message['Server_port_1'] = routing_table.self_port
-    message['Server_ID1'] = "Cost 0"
-
-    for i, (x ,y) in enumerate(zip(routing_table.servers_ip[1:],routing_table.distances),2):
-        message['Server_IP_address_' + str(i)] = x.ip
-        message['Server_port_' +str(i)] = x.port
-        message['Server_ID' + str(i )] = "Cost " + str(y.distance)
-    
+    message['server_IP'] = routing_table.self_ip
+    message['distance_vectors'] = []
+    for vec in ROUTING_VECTOR.keys():
+        info_server = [s for s in routing_table.servers_ip if s.id == vec][0]
+        new_vector = {'ip': info_server.ip, 'port': info_server.port, 'distance': ROUTING_VECTOR[vec]['cost']}
+        message['distance_vectors'].append(new_vector)
 
     return message
+
+def generate_vector_update_dict(message):
+    node_info = [s for s in routing_table.servers_ip if s.ip == message['server_IP'] and s.port == message['server_port']]
+    d_v = {}
+    node_id = 0
+    if len(node_info) == 0:
+        routing_table.num_servers += 1
+        routing_table.servers_ip.append(ServerIPs(f"{routing_table.num_servers} {message['server_IP']} {message['server_port']}"))
+        node_id = routing_table.num_servers
+    else:
+        node_info = node_info[0]
+        node_id = node_info.id
+
+        for vec in message['distance_vectors']:
+            id = [s for s in routing_table.servers_ip if s.ip == vec['ip'] and s.port == vec['port']][0].id
+            dst = vec['distance']
+            d_v.update({id: dst})
+
+    update_distance_vector(d_v, node_id)
+
 
 
 class UDPServerThread:
@@ -36,6 +52,7 @@ class UDPServerThread:
         self.server_thread.daemon = True  # Set as a daemon thread
 
     def start_server(self):
+        global NUM_RECEIVED_PACKETS
         # Create a UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -47,11 +64,10 @@ class UDPServerThread:
         while True:
             # Listen for incoming messages
             data, addr = sock.recvfrom(1024)  # Buffer size is 1024 bytes
-            # Parse data to correct format for update_distance_vector function and pass it to
-            print(f"Received message: {data.decode()} from {addr}")
 
             received_data = self.deserialize_data(data)
-
+            generate_vector_update_dict(received_data)
+            NUM_RECEIVED_PACKETS += 1
     def deserialize_data(self, data):
         # Convert the received string data to a dictionary
         decoded_data = data.decode('utf-8')
@@ -67,9 +83,8 @@ class UDPServerThread:
 
     def send_packet(self):
         ## This function is called on "step" command to send messages to all servers in routing_table
-        #
 
+        update_packet = generate_message()
         for n in routing_table.servers_ip[1:]:
-            update_packet = generate_message()
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
-                client_socket.sendto(str(update_packet).encode('utf-8'),('localhost',n.port))
+                client_socket.sendto(str(update_packet).encode('utf-8'),(n.ip,n.port))

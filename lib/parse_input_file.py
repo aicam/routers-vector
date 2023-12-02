@@ -10,11 +10,9 @@ def read_file(file):
     lines = [l.replace("\n", "") for l in f.readlines()]
     routing_table.num_servers = int(lines[0])
     routing_table.num_neighbors = int(lines[1])
-    for i in range(2, routing_table.num_neighbors + 3):
+    for i in range(2, routing_table.num_servers + 2):
         routing_table.servers_ip.append(struct.ServerIPs(lines[i]))
-    for i in range(routing_table.num_neighbors + 3, (2 * routing_table.num_neighbors) + 3):
-        if lines == 'infinity':
-            lines = float('inf')
+    for i in range(routing_table.num_servers + 2, (routing_table.num_servers + routing_table.num_neighbors) + 2):
         routing_table.distances.append(struct.Distances(lines[i]))
     self_host = [s for s in routing_table.servers_ip if s.id == 1][0]
     routing_table.self_ip = self_host.ip

@@ -1,6 +1,6 @@
 from lib.parse_input_file import read_file
 from lib.server import UDPServerThread
-from lib.structures import ROUTING_VECTOR, routing_table
+from lib.structures import ROUTING_VECTOR, routing_table, NUM_RECEIVED_PACKETS
 from lib.router import generate_distance_vector_host
 from lib.server import generate_message
 import time
@@ -32,7 +32,6 @@ if __name__ == "__main__":
         cmd = input("Enter new command: \n")
         if cmd == 'display':
             print(ROUTING_VECTOR)
-            generate_message()
         if cmd == 'step':
             UDP_server.send_packet()
         if cmd == 'exit':

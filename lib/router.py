@@ -1,6 +1,5 @@
 from . import structures as struct
-from .structures import routing_table
-import numpy as np
+from .structures import routing_table, INFINITY
 
 def generate_distance_vector_host():
     '''
@@ -16,18 +15,18 @@ def generate_distance_vector_host():
         if dst_id == 1:
             cost = 0
             vec = 1
-            struct.ROUTING_VECTOR.update({dst_id: {'costs': cost, 'vector': vec}})
+            struct.ROUTING_VECTOR.update({dst_id: {'cost': cost, 'vector': vec}})
             continue
 
         neighbor = [s for s in routing_table.distances if s.id2 == dst_id]
         if len(neighbor) == 0:
-            cost = np.inf
+            cost = INFINITY
             vec = dst_id
         else:
             neighbor = neighbor[0]
             cost = neighbor.distance
             vec = dst_id
-        struct.ROUTING_VECTOR.update({dst_id: {'costs': cost, 'vector': vec}})
+        struct.ROUTING_VECTOR.update({dst_id: {'cost': cost, 'vector': vec}})
 
 def update_distance_vector(d_v: dict, node_id: int):
     '''
@@ -38,6 +37,9 @@ def update_distance_vector(d_v: dict, node_id: int):
     It will update the routing vector
     '''
     distance_from_node = struct.ROUTING_VECTOR[node_id]['cost']
+    if distance_from_node > d_v[1]:
+        distance_from_node = d_v[1]
+
     for dst_id in range(1, routing_table.num_servers + 1):
 
         if dst_id == 1:
@@ -48,5 +50,5 @@ def update_distance_vector(d_v: dict, node_id: int):
                 continue
 
         if d_v[dst_id] + distance_from_node < struct.ROUTING_VECTOR[dst_id]['cost']:
-            struct.ROUTING_VECTOR[dst_id]['cost'] = d_v[dst_id]
+            struct.ROUTING_VECTOR[dst_id]['cost'] = d_v[dst_id] + distance_from_node
             struct.ROUTING_VECTOR[dst_id]['vector'] = node_id
