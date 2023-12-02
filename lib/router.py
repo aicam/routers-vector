@@ -34,7 +34,7 @@ def update_distance_vector(d_v: dict, node_id: int):
     This function is called after a new packet received from another node
     Note: incoming packet should be parsed into a dictionary with key = node_id in our routing table and value = cost
     :param d_v: dictionary of distances of the sending node to other nodes
-    :param node_id: id of the node sent this packet (it should be found using IP address of the sender)
+    :param node_id: id of the node sent this packet (it should be found using IP address of the sender) 
     It will update the routing vector
     '''
     distance_from_node = struct.ROUTING_VECTOR[node_id]['cost']

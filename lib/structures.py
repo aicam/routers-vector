@@ -1,6 +1,7 @@
 from typing import List
 from dataclasses import dataclass
 
+
 ROUTING_VECTOR = {}
 
 class ServerIPs:
@@ -20,13 +21,13 @@ class ServerIPs:
 class Distances:
     id1: int
     id2: int
-    distance: int
+    distance: float
 
     def __init__(self, line: str):
         line_s = line.split(" ")
         self.id1 = int(line_s[0])
         self.id2 = int(line_s[1])
-        self.distance = int(line_s[2])
+        self.distance = float(line_s[2])
 
 class RoutingTable:
     self_ip: str

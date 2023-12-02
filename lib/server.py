@@ -1,12 +1,32 @@
 import socket
 import threading
-from .structures import ROUTING_VECTOR
+from .structures import routing_table, ROUTING_VECTOR
 def generate_message():
-    '''
-    TODO
-    This function reads ROUTING_VECTOR and parse it to the correct format for sending to other nodes
-    '''
-    pass
+    ## This function reads routing_table and parse it to the correct format for sending to other nodes
+    ## Routing updates are sent using the General Message format. All routing updates are UDP unreliable
+    ## The message format for the data part is: 
+    message = {}
+    # Number of update fields check if the routing vector has any changes
+    ## TODO add real updated entries
+    num_entries = len(ROUTING_VECTOR)
+    message['Number_of_updates'] = num_entries
+    # Server port
+    message['Server_port'] = routing_table.self_port
+    # Server IP
+    message['Server_IP'] = routing_table.self_ip
+    # Server entry to reach itself wit hcost 0
+    message['Server_IP_address_1'] = routing_table.self_ip
+    message['Server_port_1'] = routing_table.self_port
+    message['Server_ID1'] = "Cost 0"
+
+    for i, (x ,y) in enumerate(zip(routing_table.servers_ip[1:],routing_table.distances),2):
+        message['Server_IP_address_' + str(i)] = x.ip
+        message['Server_port_' +str(i)] = x.port
+        message['Server_ID' + str(i )] = "Cost " + str(y.distance)
+    
+
+    return message
+
 
 class UDPServerThread:
     def __init__(self, ip, port):
@@ -30,6 +50,13 @@ class UDPServerThread:
             # Parse data to correct format for update_distance_vector function and pass it to
             print(f"Received message: {data.decode()} from {addr}")
 
+            received_data = self.deserialize_data(data)
+
+    def deserialize_data(self, data):
+        # Convert the received string data to a dictionary
+        decoded_data = data.decode('utf-8')
+        received_data = eval(decoded_data)  # Use eval cautiously; it's suitable here since we control the format
+        return received_data
 
     def start(self):
         self.server_thread.start()  # Start the server thread
@@ -39,7 +66,10 @@ class UDPServerThread:
         pass
 
     def send_packet(self):
-        '''
-        TODO
-        This function is called on "step" command to send messages to all servers in routing_table
-        '''
+        ## This function is called on "step" command to send messages to all servers in routing_table
+        #
+
+        for n in routing_table.servers_ip[1:]:
+            update_packet = generate_message()
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+                client_socket.sendto(str(update_packet).encode('utf-8'),('localhost',n.port))
