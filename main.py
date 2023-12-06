@@ -1,14 +1,10 @@
 from lib.parse_input_file import read_file
 from lib.server import UDPServerThread
-from lib.structures import ROUTING_VECTOR, routing_table, NUM_RECEIVED_PACKETS
+from lib.structures import ROUTING_VECTOR, routing_table
 from lib.router import generate_distance_vector_host
-from lib.server import generate_message
 import time
-'''
-    TODO:
-    record all times packet received
-    
-'''
+
+
 
 if __name__ == "__main__":
     cmd = input("Enter server command to start server: ")
@@ -34,5 +30,8 @@ if __name__ == "__main__":
             print(ROUTING_VECTOR)
         if cmd == 'step':
             UDP_server.send_packet()
+        if cmd == 'packets':
+            print(UDP_server.packet_count)
+            UDP_server.packet_count = 0
         if cmd == 'exit':
             exit()
