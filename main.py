@@ -27,10 +27,13 @@ if __name__ == "__main__":
         ## Commands come here
         cmd = input("Enter new command: \n")
         if cmd == 'display':
+            print("display SUCCESS")
             print(ROUTING_VECTOR)
         if cmd == 'step':
+            print("step SUCCESS")
             UDP_server.send_packet()
         if cmd == 'packets':
+            print("packets SUCCESS")
             print(UDP_server.packet_count)
             UDP_server.packet_count = 0
         if cmd == 'exit':

@@ -66,6 +66,7 @@ class UDPServerThread:
             # Listen for incoming messages
             data, addr = sock.recvfrom(1024)  # Buffer size is 1024 bytes
             received_data = self.deserialize_data(data)
+            print(f"RECIEVED A MESSAGE FROM SERVER {received_data['server_port']}")
             generate_vector_update_dict(received_data)
             self.packet_count += 1
 
