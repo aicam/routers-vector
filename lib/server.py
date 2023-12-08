@@ -1,7 +1,7 @@
 import socket
 import threading
-from .structures import routing_table, ROUTING_VECTOR, ServerIPs
-from .router import update_distance_vector
+from .structures import routing_table, ROUTING_VECTOR, ServerIPs, NUM_RECEIVED_PACKETS
+from .router import update_distance_vector, update_command, disable_command
 
 def generate_message():
     ## This function reads routing_table and parse it to the correct format for sending to other nodes
@@ -50,10 +50,9 @@ class UDPServerThread:
         self.port = port
         self.server_thread = threading.Thread(target=self.start_server)
         self.server_thread.daemon = True  # Set as a daemon thread
-        self.packet_count = 0
-        
 
     def start_server(self):
+        global NUM_RECEIVED_PACKETS
         # Create a UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -65,11 +64,10 @@ class UDPServerThread:
         while True:
             # Listen for incoming messages
             data, addr = sock.recvfrom(1024)  # Buffer size is 1024 bytes
-            received_data = self.deserialize_data(data)
-            print(f"RECIEVED A MESSAGE FROM SERVER {received_data['server_port']}")
-            generate_vector_update_dict(received_data)
-            self.packet_count += 1
 
+            received_data = self.deserialize_data(data)
+            generate_vector_update_dict(received_data)
+            NUM_RECEIVED_PACKETS += 1
     def deserialize_data(self, data):
         # Convert the received string data to a dictionary
         decoded_data = data.decode('utf-8')
@@ -87,6 +85,26 @@ class UDPServerThread:
         ## This function is called on "step" command to send messages to all servers in routing_table
 
         update_packet = generate_message()
+        for n in routing_table.servers_ip[1:]:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+                client_socket.sendto(str(update_packet).encode('utf-8'),(n.ip,n.port))
+    
+    def send_update(self, id1:int, id2: int, distance: int):
+        # For Update command
+
+        update_command(id2, distance)
+        update_packet = generate_message()
+
+        for n in routing_table.servers_ip[1:]:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+                client_socket.sendto(str(update_packet).encode('utf-8'),(n.ip,n.port))
+    
+    def send_disable(self, id2:int):
+        # For Disable Commanbd
+
+        disable_command(id2)
+        update_packet = generate_message()
+
         for n in routing_table.servers_ip[1:]:
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
                 client_socket.sendto(str(update_packet).encode('utf-8'),(n.ip,n.port))
