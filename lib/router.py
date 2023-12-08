@@ -52,3 +52,9 @@ def update_distance_vector(d_v: dict, node_id: int):
         if d_v[dst_id] + distance_from_node < struct.ROUTING_VECTOR[dst_id]['cost']:
             struct.ROUTING_VECTOR[dst_id]['cost'] = d_v[dst_id] + distance_from_node
             struct.ROUTING_VECTOR[dst_id]['vector'] = node_id
+
+def update_command(id: int, distance: int):
+    struct.ROUTING_VECTOR[id]['cost'] = distance
+
+def disable_command(id: int):
+    struct.ROUTING_VECTOR[id]['cost'] = INFINITY

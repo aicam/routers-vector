@@ -1,10 +1,14 @@
 from lib.parse_input_file import read_file
 from lib.server import UDPServerThread
-from lib.structures import ROUTING_VECTOR, routing_table
+from lib.structures import ROUTING_VECTOR, routing_table, NUM_RECEIVED_PACKETS, INFINITY
 from lib.router import generate_distance_vector_host
+from lib.server import generate_message
 import time
-
-
+'''
+    TODO:
+    record all times packet received
+    
+'''
 
 if __name__ == "__main__":
     cmd = input("Enter server command to start server: ")
@@ -27,14 +31,47 @@ if __name__ == "__main__":
         ## Commands come here
         cmd = input("Enter new command: \n")
         if cmd == 'display':
-            print("display SUCCESS")
             print(ROUTING_VECTOR)
         if cmd == 'step':
-            print("step SUCCESS")
             UDP_server.send_packet()
-        if cmd == 'packets':
-            print("packets SUCCESS")
-            print(UDP_server.packet_count)
-            UDP_server.packet_count = 0
         if cmd == 'exit':
             exit()
+
+        if cmd.__contains__("update"):
+            try:
+                _, serverID1, serverID2, link_cost = cmd.split(' ')
+                
+                serverID1 = int(serverID1)
+                serverID2 = int(serverID2)
+
+                if link_cost == 'inf':
+                    link_cost = INFINITY
+                else:
+                    link_cost = int(link_cost)
+
+                UDP_server.send_update(serverID1, serverID2, link_cost)
+                print(f"Server ID 1: {serverID1}\nServer ID 2: {serverID2}\nLink Cost:{link_cost}\n")
+
+            except ValueError as e:
+                print(f"Error: {e}")
+                print("Command: update <server-ID1> <server-ID2> <Link Cost>")
+                print()
+            except Exception as e:
+                print(f"An exception of type {type(e).__name__} occurred: {e}")
+                print()
+
+        if cmd.__contains__("disable"):
+            try:
+                _, serverID = cmd.split(' ')
+                serverID = int(serverID)
+                UDP_server.send_disable(serverID)
+                print("Server Disabled")
+                print(f"SERVER {serverID} HAS BEEN DISABLED")
+
+            except ValueError as e:
+                print(f"Error: {e}")
+                print("Command: disable <server-ID1>")
+                print()
+            except Exception as e:
+                print(f"An exception of type {type(e).__name__} occurred: {e}")
+                print()
