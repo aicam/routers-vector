@@ -1,7 +1,6 @@
 from typing import List
 
 ROUTING_VECTOR = {}
-NUM_RECEIVED_PACKETS = 0
 INFINITY = 999999
 class ServerIPs:
     id: int
