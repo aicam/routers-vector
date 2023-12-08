@@ -1,2 +1,2 @@
-server -t routing.txt -i 2
-server -t routing02.txt -i 2
+server -t routing.txt -i 200
+server -t routing02.txt -i 200

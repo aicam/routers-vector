@@ -6,6 +6,7 @@ class ServerIPs:
     id: int
     ip: str
     port: int
+    closed: bool
 
     def __init__(self, line: str):
         line_s = line.split(" ")
@@ -15,6 +16,7 @@ class ServerIPs:
         self.port = server_port
         self.ip = server_ip
         self.id = server_id
+        self.closed = False
 
 class Distances:
     id1: int
@@ -25,7 +27,10 @@ class Distances:
         line_s = line.split(" ")
         self.id1 = int(line_s[0])
         self.id2 = int(line_s[1])
-        self.distance = float(line_s[2])
+        if line_s[2] == 'inf':
+            self.distance = INFINITY
+        else:
+            self.distance = float(line_s[2])
 
 class RoutingTable:
     self_ip: str

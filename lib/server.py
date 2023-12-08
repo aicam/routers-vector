@@ -25,24 +25,17 @@ def generate_message():
 
 def generate_vector_update_dict(message):
     node_info = [s for s in routing_table.servers_ip if s.ip == message['server_IP'] and s.port == message['server_port']]
+    node_info = node_info[0]
     d_v = {}
-    node_id = 0
-    if len(node_info) == 0:
-        routing_table.num_servers += 1
-        routing_table.servers_ip.append(ServerIPs(f"{routing_table.num_servers} {message['server_IP']} {message['server_port']}"))
-        node_id = routing_table.num_servers
-    else:
-        node_info = node_info[0]
-        node_id = node_info.id
-
-        for vec in message['distance_vectors']:
-            id = [s for s in routing_table.servers_ip if s.ip == vec['ip'] and s.port == vec['port']][0].id
-            dst = vec['distance']
+    node_id = node_info.id
+    for vec in message['distance_vectors']:
+        id = [s for s in routing_table.servers_ip if s.ip == vec['ip'] and s.port == vec['port']][0].id
+        dst = vec['distance']
+        if id == 1:
+            d_v.update({node_id: dst})
+        else:
             d_v.update({id: dst})
-
     update_distance_vector(d_v, node_id)
-
-
 
 class UDPServerThread:
     def __init__(self, ip, port):
@@ -66,7 +59,6 @@ class UDPServerThread:
             # Listen for incoming messages
             data, addr = sock.recvfrom(1024)  # Buffer size is 1024 bytes
             received_data = self.deserialize_data(data)
-            print(f"RECIEVED A MESSAGE FROM SERVER {received_data['server_port']}")
             generate_vector_update_dict(received_data)
             self.packet_count += 1
 
@@ -88,5 +80,7 @@ class UDPServerThread:
 
         update_packet = generate_message()
         for n in routing_table.servers_ip[1:]:
+            if n.closed:
+                continue
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
                 client_socket.sendto(str(update_packet).encode('utf-8'),(n.ip,n.port))

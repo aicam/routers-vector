@@ -12,10 +12,10 @@ def send_packet_interval(func, interval: int):
         func()
 
 if __name__ == "__main__":
-    cmd = input("Enter server command to start server: ")
+    # cmd = input("Enter server command to start server: ")
 
-    cmd_s = cmd.split(" ")
-    top, interval = cmd_s[2], int(cmd_s[4])
+    # cmd_s = cmd.split(" ")
+    top, interval = "routing.txt", 200
 
     read_file(top)
     routing_table.display()
